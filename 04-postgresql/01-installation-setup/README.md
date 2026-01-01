@@ -4,170 +4,74 @@
 
 ## نظرة عامة
 
-تثبيت PostgreSQL وإعداد البيئة للعمل.
+في هذا الـ Module هنتعلم كيفية تثبيت PostgreSQL وإعداد بيئة العمل بشكل صحيح. هنغطي كل الأنظمة (Windows, Linux, macOS) وهنتعلم الأدوات الأساسية اللي هنحتاجها.
+
+**المدة المتوقعة:** 2-3 ساعات
 
 </div>
 
 ---
 
-## 🔧 Installing PostgreSQL
+## 📚 Lessons (الدروس)
 
-### Windows:
+### الأساسيات
 
-1. **Download:**
-   - Go to [postgresql.org/download](https://www.postgresql.org/download/)
-   - Download PostgreSQL 16+ installer
-   - Run installer
+1. **[ما هو PostgreSQL؟](./lessons/01-what-is-postgresql.md)**
+   <div dir="rtl">- تعريف PostgreSQL - تاريخه - ليه نستخدمه - مقارنة مع Databases تانية</div>
 
-2. **Installation Steps:**
-   - Choose installation directory
-   - Select components (PostgreSQL Server, pgAdmin, Command Line Tools)
-   - Set port: **5432** (default)
-   - Set password for **postgres** user (remember it!)
+2. **[تثبيت PostgreSQL على Windows](./lessons/02-installation-windows.md)**
+   <div dir="rtl">- تحميل وتثبيت خطوة بخطوة - حل المشاكل الشائعة - التحقق من التثبيت</div>
 
-3. **Verify Installation:**
-```powershell
-psql --version
-# Output: psql (PostgreSQL) 16.x
-```
+3. **[تثبيت PostgreSQL على Linux](./lessons/03-installation-linux.md)**
+   <div dir="rtl">- Ubuntu/Debian - Fedora/CentOS - إعداد الـ Service</div>
 
-### Linux (Ubuntu/Debian):
+4. **[تثبيت PostgreSQL على macOS](./lessons/04-installation-macos.md)**
+   <div dir="rtl">- Homebrew - Postgres.app - التحقق من التثبيت</div>
 
-```bash
-# Update package list
-sudo apt update
+5. **[إعداد pgAdmin](./lessons/05-pgadmin-setup.md)**
+   <div dir="rtl">- تثبيت pgAdmin - الاتصال بـ Server - التنقل في الواجهة</div>
 
-# Install PostgreSQL
-sudo apt install postgresql postgresql-contrib
+6. **[أوامر psql الأساسية](./lessons/06-psql-commands.md)**
+   <div dir="rtl">- الاتصال بالـ Database - أوامر التنقل - تنفيذ SQL</div>
 
-# Start service
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
+7. **[إنشاء أول Database](./lessons/07-first-database.md)**
+   <div dir="rtl">- CREATE DATABASE - إعداد User - الصلاحيات</div>
 
-# Verify
-psql --version
-```
+8. **[Connection Strings](./lessons/08-connection-strings.md)**
+   <div dir="rtl">- صيغة الـ Connection String - المعاملات - أمثلة</div>
 
 ---
 
-## 💻 pgAdmin Setup
+## 💻 Examples (أمثلة عملية)
 
-**pgAdmin** = GUI tool لإدارة PostgreSQL
-
-1. Open pgAdmin (installed with PostgreSQL)
-2. Create server connection:
-   - Name: `Local PostgreSQL`
-   - Host: `localhost`
-   - Port: `5432`
-   - Username: `postgres`
-   - Password: (what you set during installation)
+1. **[تثبيت كامل على Windows خطوة بخطوة](./examples/01-windows-full-setup.md)**
+2. **[إعداد بيئة تطوير محلية](./examples/02-local-dev-environment.md)**
+3. **[إنشاء User وقاعدة بيانات لمشروع](./examples/03-project-database-setup.md)**
 
 ---
 
-## 🎯 Creating Your First Database
+## 📖 Resources (موارد إضافية)
 
-### Using psql CLI:
-
-```bash
-# Connect to PostgreSQL
-psql -U postgres
-
-# Create database
-CREATE DATABASE myapp;
-
-# List databases
-\l
-
-# Connect to database
-\c myapp
-
-# Exit
-\q
-```
-
-### Using pgAdmin:
-
-1. Right-click **Databases**
-2. Create → Database
-3. Name: `myapp`
-4. Save
+1. **[دليل حل المشاكل الشائعة](./resources/troubleshooting-guide.md)**
+2. **[أوامر psql المرجعية](./resources/psql-reference.md)**
+3. **[إعدادات postgresql.conf](./resources/config-guide.md)**
 
 ---
 
-## 📋 Essential psql Commands
+## 🎯 ماذا ستتعلم؟
 
-```sql
--- List databases
-\l
+<div dir="rtl">
 
--- Connect to database
-\c database_name
+بعد إنهاء هذا Module، هتكون قادر على:
 
--- List tables
-\dt
+- ✅ تثبيت PostgreSQL على أي نظام تشغيل
+- ✅ استخدام pgAdmin لإدارة الـ Databases
+- ✅ استخدام psql CLI بكفاءة
+- ✅ إنشاء Databases و Users
+- ✅ فهم Connection Strings
+- ✅ حل المشاكل الشائعة في التثبيت
 
--- Describe table
-\d table_name
-
--- List users
-\du
-
--- Execute SQL file
-\i /path/to/file.sql
-
--- Help
-\?
-
--- Quit
-\q
-```
-
----
-
-## 🔐 Creating Database User
-
-```sql
--- Create user
-CREATE USER myapp_user WITH PASSWORD 'secure_password';
-
--- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE myapp TO myapp_user;
-
--- Grant table privileges
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myapp_user;
-```
-
----
-
-## 🎯 Your First Table
-
-```sql
--- Connect to database
-\c myapp
-
--- Create table
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    age INT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Insert data
-INSERT INTO users (name, email, age) 
-VALUES ('Ahmed', 'ahmed@test.com', 25);
-
--- Query data
-SELECT * FROM users;
-```
-
-**Output:**
-```
- id |  name  |      email       | age |         created_at         
-----+--------+------------------+-----+----------------------------
-  1 | Ahmed  | ahmed@test.com   |  25 | 2024-12-21 20:00:00.123456
-```
+</div>
 
 ---
 
@@ -175,25 +79,15 @@ SELECT * FROM users;
 
 <div dir="rtl">
 
-- [ ] ✅ PostgreSQL installed
-- [ ] ✅ psql command works
-- [ ] ✅ pgAdmin installed & configured
-- [ ] ✅ Created first database
-- [ ] ✅ Created first table
-- [ ] ✅ Can insert & query data
+قبل الانتقال للـ Module التالي، تأكد إنك:
+
+- [ ] ثبّت PostgreSQL بنجاح
+- [ ] أمر `psql --version` شغال
+- [ ] pgAdmin متصل بالـ Server
+- [ ] أنشأت أول Database
+- [ ] عرفت تنفذ SQL query بسيط
 
 </div>
-
----
-
-## 🔧 Connection String Format
-
-```
-postgresql://user:password@host:port/database
-
-# Example:
-postgresql://postgres:mypassword@localhost:5432/myapp
-```
 
 ---
 

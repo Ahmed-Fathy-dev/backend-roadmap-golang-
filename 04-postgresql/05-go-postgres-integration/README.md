@@ -1,365 +1,263 @@
-# Module 4.5: Go + PostgreSQL Integration 🔌
+# Module 05: Go + PostgreSQL Integration 🔌
 
 <div dir="rtl">
 
 ## نظرة عامة
 
-ربط Go مع PostgreSQL - من Raw SQL لـ GORM ORM.
+في الـ Module ده هنتعلم إزاي نربط Go مع PostgreSQL. هنبدأ من الأساسيات باستخدام `database/sql` ونوصل لـ GORM ORM والـ migrations والـ patterns المتقدمة.
+
+**المستوى:** متوسط - متقدم
+**المدة المتوقعة:** 5-6 ساعات
 
 </div>
 
 ---
 
-## 📚 Option 1: database/sql + pgx
+## 📚 فهرس الدروس
 
-### Installation:
+### 🔌 الاتصال بقاعدة البيانات
 
-```bash
-go get github.com/jackc/pgx/v5
-go get github.com/jackc/pgx/v5/stdlib
-```
+| # | الدرس | الوصف | المدة |
+|---|-------|-------|-------|
+| 01 | [database/sql Basics](./lessons/01-database-sql.md) | مقدمة في database/sql | 25 دقيقة |
+| 02 | [pgx Driver](./lessons/02-pgx-driver.md) | استخدام pgx للـ PostgreSQL | 25 دقيقة |
+| 03 | [Connection Pooling](./lessons/03-connection-pooling.md) | إدارة الـ connections | 20 دقيقة |
 
-### Connection:
+### 📝 عمليات CRUD
 
-```go
-package main
+| # | الدرس | الوصف | المدة |
+|---|-------|-------|-------|
+| 04 | [Basic CRUD](./lessons/04-basic-crud.md) | عمليات CRUD الأساسية | 30 دقيقة |
+| 05 | [Prepared Statements](./lessons/05-prepared-statements.md) | الـ statements المجهزة | 20 دقيقة |
+| 06 | [Transactions in Go](./lessons/06-transactions.md) | التعامل مع Transactions | 25 دقيقة |
 
-import (
-    "database/sql"
-    "fmt"
-    "log"
-    
-    _ "github.com/jackc/pgx/v5/stdlib"
-)
+### 🏗️ GORM ORM
 
-func main() {
-    // Connection string
-    dsn := "postgres://postgres:password@localhost:5432/myapp?sslmode=disable"
-    
-    // Open connection
-    db, err := sql.Open("pgx", dsn)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
-    
-    // Test connection
-    if err := db.Ping(); err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println("Connected to PostgreSQL!")
-}
-```
+| # | الدرس | الوصف | المدة |
+|---|-------|-------|-------|
+| 07 | [GORM Basics](./lessons/07-gorm-basics.md) | مقدمة في GORM | 30 دقيقة |
+| 08 | [GORM Models](./lessons/08-gorm-models.md) | تعريف الـ Models | 25 دقيقة |
+| 09 | [GORM Relations](./lessons/09-gorm-relations.md) | العلاقات في GORM | 30 دقيقة |
+| 10 | [GORM Advanced](./lessons/10-gorm-advanced.md) | ميزات متقدمة | 25 دقيقة |
 
-### CRUD Example:
+### 🔄 Migrations
 
-```go
-package main
+| # | الدرس | الوصف | المدة |
+|---|-------|-------|-------|
+| 11 | [Database Migrations](./lessons/11-migrations.md) | إدارة الـ schema | 25 دقيقة |
+| 12 | [golang-migrate](./lessons/12-golang-migrate.md) | أداة golang-migrate | 25 دقيقة |
 
-import (
-    "database/sql"
-    "fmt"
-    "log"
-    
-    _ "github.com/jackc/pgx/v5/stdlib"
-)
+### 🏭 Patterns & Best Practices
 
-type User struct {
-    ID    int
-    Name  string
-    Email string
-    Age   int
-}
-
-func main() {
-    dsn := "postgres://postgres:password@localhost:5432/myapp?sslmode=disable"
-    db, err := sql.Open("pgx", dsn)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
-    
-    // CREATE
-    _, err = db.Exec(`
-        INSERT INTO users (name, email, age) 
-        VALUES ($1, $2, $3)
-    `, "Ahmed", "ahmed@test.com", 25)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    // READ
-    var user User
-    err = db.QueryRow("SELECT id, name, email, age FROM users WHERE email = $1", 
-        "ahmed@test.com").Scan(&user.ID, &user.Name, &user.Email, &user.Age)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("User: %+v\n", user)
-    
-    //UPDATE
-    _, err = db.Exec("UPDATE users SET age = $1 WHERE email = $2", 26, "ahmed@test.com")
-    
-    // DELETE
-    _, err = db.Exec("DELETE FROM users WHERE email = $1", "ahmed@test.com")
-}
-```
+| # | الدرس | الوصف | المدة |
+|---|-------|-------|-------|
+| 13 | [Repository Pattern](./lessons/13-repository-pattern.md) | Repository Pattern | 25 دقيقة |
+| 14 | [Error Handling](./lessons/14-error-handling.md) | التعامل مع الأخطاء | 20 دقيقة |
+| 15 | [Testing Database Code](./lessons/15-testing.md) | اختبار كود الـ database | 25 دقيقة |
 
 ---
 
-## 🎯 Option 2: GORM (Recommended)
-
-### Installation:
-
-```bash
-go get -u gorm.io/gorm
-go get -u gorm.io/driver/postgres
-```
-
-### Connection:
-
-```go
-package main
-
-import (
-    "fmt"
-    "log"
-    
-    "gorm.io/driver/postgres"
-    "gorm.io/gorm"
-)
-
-func main() {
-    dsn := "host=localhost user=postgres password=password dbname=myapp port=5432 sslmode=disable"
-    
-    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println("Connected via GORM!")
-}
-```
-
-### Models & Auto-Migration:
-
-```go
-package main
-
-import (
-    "gorm.io/driver/postgres"
-    "gorm.io/gorm"
-    "time"
-)
-
-type User struct {
-    ID        uint      `gorm:"primaryKey"`
-    Name      string    `gorm:"size:100;not null"`
-    Email     string    `gorm:"size:100;uniqueIndex;not null"`
-    Age       int
-    CreatedAt time.Time
-    UpdatedAt time.Time
-}
-
-func main() {
-    dsn := "host=localhost user=postgres password=password dbname=myapp port=5432"
-    db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    
-    // Auto-migrate (creates table if doesn't exist)
-    db.AutoMigrate(&User{})
-}
-```
-
-### CRUD with GORM:
-
-```go
-package main
-
-import (
-    "fmt"
-    "gorm.io/driver/postgres"
-    "gorm.io/gorm"
-)
-
-type User struct {
-    ID    uint   `gorm:"primaryKey"`
-    Name  string
-    Email string `gorm:"uniqueIndex"`
-    Age   int
-}
-
-func main() {
-    dsn := "host=localhost user=postgres password=password dbname=myapp port=5432"
-    db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    
-    // CREATE
-    user := User{Name: "Ahmed", Email: "ahmed@test.com", Age: 25}
-    db.Create(&user)
-    fmt.Println("Created user ID:", user.ID)
-    
-    // READ
-    var foundUser User
-    db.First(&foundUser, user.ID)  // Find by ID
-    db.Where("email = ?", "ahmed@test.com").First(&foundUser)  // Find by email
-    
-    // READ ALL
-    var users []User
-    db.Find(&users)
-    
-    // UPDATE
-    db.Model(&user).Update("age", 26)
-    db.Model(&user).Updates(User{Name: "Ahmed Ali", Age: 26})
-    
-    // DELETE
-    db.Delete(&user)
-}
-```
-
----
-
-## 🔄 Complete API Example
-
-```go
-package main
-
-import (
-    "github.com/gin-gonic/gin"
-    "gorm.io/driver/postgres"
-    "gorm.io/gorm"
-)
-
-type User struct {
-    ID    uint   `gorm:"primaryKey" json:"id"`
-    Name  string `json:"name"`
-    Email string `gorm:"uniqueIndex" json:"email"`
-    Age   int    `json:"age"`
-}
-
-var db *gorm.DB
-
-func initDB() {
-    dsn := "host=localhost user=postgres password=password dbname=myapp port=5432"
-    var err error
-    db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
-        panic(err)
-    }
-    db.AutoMigrate(&User{})
-}
-
-func main() {
-    initDB()
-    
-    router := gin.Default()
-    
-    // GET all users
-    router.GET("/users", func(c *gin.Context) {
-        var users []User
-        db.Find(&users)
-        c.JSON(200, users)
-    })
-    
-    // GET user by ID
-    router.GET("/users/:id", func(c *gin.Context) {
-        var user User
-        if err := db.First(&user, c.Param("id")).Error; err != nil {
-            c.JSON(404, gin.H{"error": "User not found"})
-            return
-        }
-        c.JSON(200, user)
-    })
-    
-    // CREATE user
-    router.POST("/users", func(c *gin.Context) {
-        var user User
-        if err := c.ShouldBindJSON(&user); err != nil {
-            c.JSON(400, gin.H{"error": err.Error()})
-            return
-        }
-        
-        if err := db.Create(&user).Error; err != nil {
-            c.JSON(500, gin.H{"error": err.Error()})
-            return
-        }
-        
-        c.JSON(201, user)
-    })
-    
-    // UPDATE user
-    router.PUT("/users/:id", func(c *gin.Context) {
-        var user User
-        if err := db.First(&user, c.Param("id")).Error; err != nil {
-            c.JSON(404, gin.H{"error": "User not found"})
-            return
-        }
-        
-        var updateData User
-        if err := c.ShouldBindJSON(&updateData); err != nil {
-            c.JSON(400, gin.H{"error": err.Error()})
-            return
-        }
-        
-        db.Model(&user).Updates(updateData)
-        c.JSON(200, user)
-    })
-    
-    // DELETE user
-    router.DELETE("/users/:id", func(c *gin.Context) {
-        if err := db.Delete(&User{}, c.Param("id")).Error; err != nil {
-            c.JSON(404, gin.H{"error": "User not found"})
-            return
-        }
-        c.JSON(200, gin.H{"message": "User deleted"})
-    })
-    
-    router.Run(":8080")
-}
-```
-
----
-
-## ✅ Best Practices
-
-```go
-// ✅ Use connection pooling
-sqlDB, _ := db.DB()
-sqlDB.SetMaxOpenConns(25)
-sqlDB.SetMaxIdleConns(5)
-
-// ✅ Handle errors properly
-if err := db.Create(&user).Error; err != nil {
-    // Handle error
-}
-
-// ✅ Use transactions
-db.Transaction(func(tx *gorm.DB) error {
-    tx.Create(&user)
-    tx.Create(&profile)
-    return nil
-})
-
-// ✅ Use environment variables
-dsn := os.Getenv("DATABASE_URL")
-```
-
----
-
-## 🎉 Track 4 Complete!
+## 🎯 أهداف الـ Module
 
 <div dir="rtl">
 
-**تهانينا!** أنهيت Track 4 🚀
+بعد الانتهاء من هذا الـ Module، ستتمكن من:
 
-**الآن جاهز لـ:**
-**➡️ Track 5: Practical Applications** - بناء Full-Stack Apps!
+1. **الاتصال** بـ PostgreSQL من Go باستخدام طرق مختلفة
+2. **تنفيذ CRUD** بكفاءة وأمان
+3. **استخدام GORM** للـ ORM مع العلاقات
+4. **إدارة الـ migrations** بشكل صحيح
+5. **تطبيق patterns** احترافية في كود الـ database
+6. **اختبار** كود الـ database
 
 </div>
+
+---
+
+## 📊 Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                       Go Application                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   ┌─────────────────┐    ┌─────────────────┐    ┌───────────────┐  │
+│   │   HTTP Handler  │    │  Business Logic │    │  Repository   │  │
+│   │   (Gin/Fiber)   │───▶│    (Services)   │───▶│   (Data)      │  │
+│   └─────────────────┘    └─────────────────┘    └───────┬───────┘  │
+│                                                          │          │
+├──────────────────────────────────────────────────────────┼──────────┤
+│                          Data Layer                      │          │
+│   ┌─────────────────────────────────────────────────────▼────────┐ │
+│   │                                                               │ │
+│   │   Option 1: database/sql + pgx                               │ │
+│   │   ┌──────────────────────────────────────────────────────┐   │ │
+│   │   │  - Raw SQL queries                                    │   │ │
+│   │   │  - Full control                                       │   │ │
+│   │   │  - Better performance for complex queries             │   │ │
+│   │   └──────────────────────────────────────────────────────┘   │ │
+│   │                                                               │ │
+│   │   Option 2: GORM ORM                                         │ │
+│   │   ┌──────────────────────────────────────────────────────┐   │ │
+│   │   │  - Auto-generate SQL                                  │   │ │
+│   │   │  - Easier relationships                               │   │ │
+│   │   │  - Auto-migrations                                    │   │ │
+│   │   └──────────────────────────────────────────────────────┘   │ │
+│   │                                                               │ │
+│   └───────────────────────────────┬───────────────────────────────┘ │
+│                                   │                                  │
+│                           Connection Pool                            │
+│                                   │                                  │
+└───────────────────────────────────┼──────────────────────────────────┘
+                                    │
+                                    ▼
+                          ┌─────────────────┐
+                          │   PostgreSQL    │
+                          │    Database     │
+                          └─────────────────┘
+```
+
+---
+
+## 🛠️ متطلبات مسبقة
+
+<div dir="rtl">
+
+### البرمجيات المطلوبة
+
+</div>
+
+```bash
+# Go 1.21+
+go version
+
+# PostgreSQL 14+
+psql --version
+
+# إنشاء database للتجربة
+createdb golearn
+```
+
+<div dir="rtl">
+
+### الـ Packages اللي هنستخدمها
+
+</div>
+
+```bash
+# pgx - PostgreSQL driver
+go get github.com/jackc/pgx/v5
+go get github.com/jackc/pgx/v5/stdlib
+
+# GORM ORM
+go get -u gorm.io/gorm
+go get -u gorm.io/driver/postgres
+
+# Migrations
+go get -u github.com/golang-migrate/migrate/v4
+
+# Testing
+go get github.com/stretchr/testify
+go get github.com/DATA-DOG/go-sqlmock
+```
+
+---
+
+## 🔧 Database vs ORM: متى تستخدم إيه؟
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    When to Use What?                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   database/sql + pgx                                                │
+│   ─────────────────────                                             │
+│   ✓ Complex queries with JOINs                                      │
+│   ✓ Performance-critical operations                                 │
+│   ✓ Bulk operations (COPY)                                          │
+│   ✓ Full control over SQL                                           │
+│   ✓ PostgreSQL-specific features                                    │
+│                                                                      │
+│   GORM ORM                                                          │
+│   ─────────                                                         │
+│   ✓ Rapid prototyping                                               │
+│   ✓ Simple CRUD operations                                          │
+│   ✓ Auto-migrations during development                              │
+│   ✓ Relationships management                                        │
+│   ✓ Database-agnostic code                                          │
+│                                                                      │
+│   Hybrid Approach (Recommended)                                      │
+│   ─────────────────────────────                                     │
+│   ✓ GORM for simple CRUD                                            │
+│   ✓ Raw SQL for complex queries                                     │
+│   ✓ Best of both worlds                                             │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📂 هيكل الـ Module
+
+```
+05-go-postgres-integration/
+├── README.md
+├── lessons/
+│   ├── 01-database-sql.md
+│   ├── 02-pgx-driver.md
+│   ├── 03-connection-pooling.md
+│   ├── 04-basic-crud.md
+│   ├── 05-prepared-statements.md
+│   ├── 06-transactions.md
+│   ├── 07-gorm-basics.md
+│   ├── 08-gorm-models.md
+│   ├── 09-gorm-relations.md
+│   ├── 10-gorm-advanced.md
+│   ├── 11-migrations.md
+│   ├── 12-golang-migrate.md
+│   ├── 13-repository-pattern.md
+│   ├── 14-error-handling.md
+│   └── 15-testing.md
+├── examples/
+│   ├── 01-simple-api/
+│   ├── 02-user-management/
+│   └── 03-e-commerce/
+└── resources/
+    ├── go-postgres-cheatsheet.md
+    └── common-errors.md
+```
+
+---
+
+## 📖 المتطلبات السابقة
+
+<div dir="rtl">
+
+قبل البدء في هذا الـ Module، تأكد من إتمام:
+
+</div>
+
+- [x] [Module 01: Installation & Setup](../01-installation-setup/README.md)
+- [x] [Module 02: SQL Basics](../02-sql-basics/README.md)
+- [x] [Module 03: CRUD Operations](../03-crud-operations/README.md)
+- [x] [Module 04: Joins & Relations](../04-joins-relations/README.md)
+
+---
+
+## 🚀 ابدأ التعلم
+
+<div dir="rtl">
+
+ابدأ بالدرس الأول:
+
+</div>
+
+**➡️ [database/sql Basics](./lessons/01-database-sql.md)**
 
 ---
 
 <div align="center">
 
-[⬅️ Previous: Joins](../04-joins-relations/README.md) | [🏠 Track 4](../README.md)
+[⬅️ Module السابق: Joins](../04-joins-relations/README.md) | [🏠 الرئيسية](../README.md) | [Module التالي: Advanced ➡️](../06-advanced-topics/README.md)
 
 </div>

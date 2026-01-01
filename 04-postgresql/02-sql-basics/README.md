@@ -4,226 +4,117 @@
 
 ## نظرة عامة
 
-أساسيات SQL - Data Types, Creating Tables, Basic Queries.
+SQL (Structured Query Language) هي اللغة اللي بنتكلم بيها مع الـ Database. في الـ Module ده هنتعلم كل أساسيات SQL من الصفر للاحتراف.
+
+**المدة المتوقعة:** 1-2 أسبوع
 
 </div>
 
 ---
 
-## 📊 Data Types
+## 📚 Lessons (الدروس)
 
-```sql
--- Numbers
-INT, BIGINT, SMALLINT          -- Integers
-DECIMAL(10,2), NUMERIC(10,2)   -- Exact numbers
-REAL, DOUBLE PRECISION         -- Floating point
+### Part 1: Data Types (أنواع البيانات)
 
--- Strings
-VARCHAR(100)                    -- Variable length
-CHAR(10)                        -- Fixed length
-TEXT                            -- Unlimited length
+1. **[مقدمة في SQL](./lessons/01-intro-to-sql.md)**
+   <div dir="rtl">- ما هو SQL - تاريخه - أنواع الأوامر - DDL, DML, DCL, TCL</div>
 
--- Date & Time
-DATE                            -- 2024-12-21
-TIME                            -- 20:30:00
-TIMESTAMP                       -- 2024-12-21 20:30:00
-TIMESTAMPTZ                     -- With timezone
+2. **[أنواع الأرقام](./lessons/02-numeric-types.md)**
+   <div dir="rtl">- INTEGER, BIGINT, SMALLINT - DECIMAL, NUMERIC - REAL, DOUBLE PRECISION - SERIAL</div>
 
--- Boolean
-BOOLEAN                         -- TRUE/FALSE
+3. **[أنواع النصوص](./lessons/03-text-types.md)**
+   <div dir="rtl">- VARCHAR, CHAR, TEXT - الفروق والاستخدامات - أفضل الممارسات</div>
 
--- JSON
-JSON, JSONB                     -- JSON data
+4. **[أنواع التاريخ والوقت](./lessons/04-datetime-types.md)**
+   <div dir="rtl">- DATE, TIME, TIMESTAMP - TIMESTAMPTZ - INTERVAL - الـ Timezone</div>
 
--- Special
-SERIAL, BIGSERIAL              -- Auto-increment
-UUID                            -- Universal ID
-```
+5. **[الأنواع الخاصة](./lessons/05-special-types.md)**
+   <div dir="rtl">- BOOLEAN - UUID - JSON, JSONB - ARRAY - ENUM</div>
 
----
+### Part 2: Creating Tables (إنشاء الجداول)
 
-## 🏗️ Creating Tables
+6. **[إنشاء الجداول](./lessons/06-create-table.md)**
+   <div dir="rtl">- CREATE TABLE - الأعمدة - القيم الافتراضية</div>
 
-```sql
-CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(200) NOT NULL,
-    description TEXT,
-    price DECIMAL(10,2) NOT NULL,
-    stock INT DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+7. **[القيود (Constraints)](./lessons/07-constraints.md)**
+   <div dir="rtl">- PRIMARY KEY - FOREIGN KEY - UNIQUE - NOT NULL - CHECK - DEFAULT</div>
 
----
+8. **[تعديل الجداول](./lessons/08-alter-table.md)**
+   <div dir="rtl">- ADD COLUMN - DROP COLUMN - MODIFY - RENAME</div>
 
-## ➕ INSERT Data
+### Part 3: Basic Queries (الاستعلامات الأساسية)
 
-```sql
--- Single insert
-INSERT INTO products (name, price, stock)
-VALUES ('Laptop', 999.99, 10);
+9. **[INSERT - إدخال البيانات](./lessons/09-insert.md)**
+   <div dir="rtl">- Single INSERT - Multiple INSERT - INSERT ... RETURNING - INSERT ... ON CONFLICT</div>
 
--- Multiple inserts
-INSERT INTO products (name, price, stock) VALUES
-    ('Mouse', 19.99, 50),
-    ('Keyboard', 49.99, 30),
-    ('Monitor', 299.99, 15);
+10. **[SELECT - قراءة البيانات](./lessons/10-select.md)**
+    <div dir="rtl">- SELECT الأساسي - Columns - Aliases - DISTINCT</div>
 
--- Return inserted data
-INSERT INTO products (name, price)
-VALUES ('Headphones', 79.99)
-RETURNING *;
-```
+11. **[WHERE - تصفية البيانات](./lessons/11-where.md)**
+    <div dir="rtl">- Comparison Operators - AND, OR, NOT - IN, BETWEEN - LIKE, ILIKE - NULL handling</div>
+
+12. **[ORDER BY & LIMIT](./lessons/12-order-limit.md)**
+    <div dir="rtl">- Sorting - ASC, DESC - LIMIT - OFFSET - Pagination</div>
+
+### Part 4: Aggregate Functions (دوال التجميع)
+
+13. **[Aggregate Functions](./lessons/13-aggregate-functions.md)**
+    <div dir="rtl">- COUNT - SUM - AVG - MIN, MAX</div>
+
+14. **[GROUP BY و HAVING](./lessons/14-group-by.md)**
+    <div dir="rtl">- تجميع البيانات - HAVING للفلترة - أمثلة عملية</div>
 
 ---
 
-## 🔍 SELECT Data
+## 💻 Examples (أمثلة عملية)
 
-```sql
--- All columns
-SELECT * FROM products;
-
--- Specific columns
-SELECT name, price FROM products;
-
--- WHERE clause
-SELECT * FROM products WHERE price > 50;
-
--- Multiple conditions
-SELECT * FROM products 
-WHERE price > 50 AND stock > 10;
-
--- OR condition
-SELECT * FROM products 
-WHERE name = 'Laptop' OR name = 'Monitor';
-
--- LIKE (pattern matching)
-SELECT * FROM products WHERE name LIKE '%top%';
-
--- IN operator
-SELECT * FROM products WHERE name IN ('Laptop', 'Mouse');
-
--- BETWEEN
-SELECT * FROM products WHERE price BETWEEN 20 AND 100;
-```
+1. **[بناء قاعدة بيانات متجر إلكتروني](./examples/01-ecommerce-database.md)**
+2. **[بناء قاعدة بيانات مدونة](./examples/02-blog-database.md)**
+3. **[استعلامات تحليلية للمبيعات](./examples/03-sales-analytics.md)**
+4. **[البحث والفلترة المتقدمة](./examples/04-advanced-search.md)**
 
 ---
 
-## 📊 ORDER BY & LIMIT
+## 📖 Resources (موارد إضافية)
 
-```sql
--- Order ascending
-SELECT * FROM products ORDER BY price;
-
--- Order descending
-SELECT * FROM products ORDER BY price DESC;
-
--- Multiple columns
-SELECT * FROM products ORDER BY price DESC, name ASC;
-
--- LIMIT
-SELECT * FROM products LIMIT 5;
-
--- OFFSET (skip first 5)
-SELECT * FROM products LIMIT 5 OFFSET 5;
-
--- Pagination (page 2, 10 items per page)
-SELECT * FROM products 
-LIMIT 10 OFFSET 10;
-```
+1. **[مرجع Data Types الكامل](./resources/data-types-reference.md)**
+2. **[أنماط SQL الشائعة](./resources/sql-patterns.md)**
+3. **[أخطاء SQL الشائعة](./resources/common-mistakes.md)**
 
 ---
 
-## 🎯 Aggregate Functions
+## 🎯 ماذا ستتعلم؟
 
-```sql
--- COUNT
-SELECT COUNT(*) FROM products;
-SELECT COUNT(*) FROM products WHERE price > 100;
+<div dir="rtl">
 
--- SUM
-SELECT SUM(stock) FROM products;
+بعد إنهاء هذا Module، هتكون قادر على:
 
--- AVG
-SELECT AVG(price) FROM products;
+- ✅ فهم وإتقان أنواع البيانات في PostgreSQL
+- ✅ تصميم وإنشاء Tables بشكل احترافي
+- ✅ كتابة Constraints صحيحة
+- ✅ إدخال وقراءة البيانات
+- ✅ تصفية وترتيب النتائج
+- ✅ استخدام Aggregate Functions
+- ✅ كتابة تقارير وتحليلات
 
--- MIN & MAX
-SELECT MIN(price), MAX(price) FROM products;
-
--- GROUP BY
-SELECT is_active, COUNT(*) 
-FROM products 
-GROUP BY is_active;
-```
+</div>
 
 ---
 
-## 🔧 Complete Example
+## ✅ Checklist
 
-```sql
--- Create students table
-CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    grade INT CHECK (grade >= 0 AND grade <= 100),
-    enrolled_at TIMESTAMP DEFAULT NOW()
-);
+<div dir="rtl">
 
--- Insert students
-INSERT INTO students (name, email, grade) VALUES
-    ('Ahmed Ali', 'ahmed@test.com', 85),
-    ('Sara Mohamed', 'sara@test.com', 92),
-    ('Omar Hassan', 'omar@test.com', 78),
-    ('Fatima Ahmed', 'fatima@test.com', 95),
-    ('Youssef Ibrahim', 'youssef@test.com', 88);
+قبل الانتقال للـ Module التالي، تأكد إنك:
 
--- Get all students
-SELECT * FROM students;
+- [ ] فهمت الفرق بين أنواع البيانات
+- [ ] تقدر تنشئ Table مع Constraints
+- [ ] تقدر تكتب INSERT, SELECT, WHERE
+- [ ] تقدر تستخدم ORDER BY, LIMIT
+- [ ] تقدر تستخدم Aggregate Functions
+- [ ] عملت تمارين على كل موضوع
 
--- Top 3 students
-SELECT name, grade 
-FROM students 
-ORDER BY grade DESC 
-LIMIT 3;
-
--- Average grade
-SELECT AVG(grade) as average_grade FROM students;
-
--- Students with grade > 85
-SELECT name, grade 
-FROM students 
-WHERE grade > 85
-ORDER BY grade DESC;
-```
-
----
-
-## ✅ Best Practices
-
-```sql
--- ✅ Always use NOT NULL for required fields
-CREATE TABLE users (
-    email VARCHAR(100) NOT NULL
-);
-
--- ✅ Use UNIQUE for unique fields
-CREATE TABLE users (
-    email VARCHAR(100) UNIQUE NOT NULL
-);
-
--- ✅ Add CHECK constraints
-CREATE TABLE products (
-    price DECIMAL(10,2) CHECK (price > 0)
-);
-
--- ✅ Use DEFAULT values
-CREATE TABLE posts (
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+</div>
 
 ---
 
@@ -239,6 +130,6 @@ CREATE TABLE posts (
 
 <div align="center">
 
-[⬅️ Previous: Installation](../01-installation-setup/README.md) | [🏠 Track 4](../README.md)
+[⬅️ Previous: Installation & Setup](../01-installation-setup/README.md) | [🏠 Track 4](../README.md)
 
 </div>
